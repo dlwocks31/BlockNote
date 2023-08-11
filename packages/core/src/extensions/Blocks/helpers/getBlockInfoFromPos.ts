@@ -25,8 +25,7 @@ export function getBlockInfoFromPos(doc: Node, pos: number): BlockInfo {
   const outerBlockGroupStartPos = 1;
   const outerBlockGroupEndPos = doc.nodeSize - 2;
   if (pos <= outerBlockGroupStartPos) {
-    pos = outerBlockGroupStartPos + 1;
-
+    pos = outerBlockGroupStartPos;
     while (
       doc.resolve(pos).parent.type.name !== "blockContainer" &&
       pos < outerBlockGroupEndPos
