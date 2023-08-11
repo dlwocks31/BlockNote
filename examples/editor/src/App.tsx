@@ -1,4 +1,4 @@
-import { BlockSchema, defaultBlockSchema, defaultProps } from "@blocknote/core";
+import { defaultBlockSchema } from "@blocknote/core";
 import "@blocknote/core/style.css";
 import {
   BlockNoteView,
@@ -7,80 +7,73 @@ import {
   getDefaultReactSlashMenuItems,
   useBlockNote,
 } from "@blocknote/react";
+import { useEffect } from "react";
 import { RiImage2Fill } from "react-icons/ri";
 
-export default function App() {
-  // Creates a custom image block.
-  const ImageBlock = createReactBlockSpec({
-    type: "image",
-    propSchema: {
-      ...defaultProps,
-      src: {
-        default: "https://via.placeholder.com/1000",
-      },
-      alt: {
-        default: "image",
-      },
+const AcordionBlock = createReactBlockSpec({
+  type: "accordion",
+  propSchema: {
+    label: {
+      default: "https://via.placeholder.com/1000",
     },
-    containsInlineContent: false,
-    render: ({ block }) => (
-      <div
-        onClick={() => {
-          editor.updateBlock(block.id, {
-            props: {
-              src: "https://via.placeholder.com/800",
-            },
-          });
-        }}>
-        <img src={block.props.src} alt={block.props.alt} />
-      </div>
-    ),
-  });
-
-  // The custom schema, which includes the default blocks and the custom image
-  // block.
-  const customSchema = {
-    // Adds all default blocks.
-    ...defaultBlockSchema,
-    // Adds the custom image block.
-    image: ImageBlock,
-  } satisfies BlockSchema;
-
-  // Creates a slash menu item for inserting an image block.
-  const insertImage: ReactSlashMenuItem<typeof customSchema> = {
-    name: "Insert Image",
-    execute: (editor) => {
-      const src: string | null = prompt("Enter image URL");
-      const alt: string | null = prompt("Enter image alt text");
-
-      editor.insertBlocks(
-        [
-          {
-            type: "image",
-            props: {
-              src: src || "https://via.placeholder.com/1000",
-              alt: alt || "image",
-            },
+  },
+  containsInlineContent: false,
+  render: ({ editor, block }) => {
+    useEffect(() => {
+      const id = setTimeout(() => {
+        editor.updateBlock(block, {
+          props: {
+            label:
+              "https://storage.googleapis.com/candycode/jotai/jotai-mascot.png",
           },
-        ],
-        editor.getTextCursorPosition().block,
-        "after"
-      );
-    },
-    aliases: ["image", "img", "picture", "media"],
-    group: "Media",
-    icon: <RiImage2Fill />,
-    hint: "Insert an image",
-  };
+        });
+      }, 2000);
 
-  // Creates a new editor instance.
+      return () => {
+        clearTimeout(id);
+      };
+    }, []);
+
+    return (
+      <div>
+        <p>Some content</p>
+        <p>{block.props.label}</p>
+      </div>
+    );
+  },
+});
+
+const customSchema = {
+  ...defaultBlockSchema,
+  accordion: AcordionBlock,
+};
+
+const insertAccordion: ReactSlashMenuItem<typeof customSchema> = {
+  name: "Insert accordion",
+  execute: (editor) => {
+    editor.insertBlocks(
+      [
+        {
+          type: "accordion",
+        },
+      ],
+      editor.getTextCursorPosition().block,
+      "before"
+    );
+  },
+  aliases: ["containers"],
+  group: "Containers",
+  icon: <RiImage2Fill />,
+  hint: "Insert an accordion",
+};
+
+export default function App() {
   const editor = useBlockNote({
     theme: "dark",
-    // Tells BlockNote which blocks to use.
     blockSchema: customSchema,
     slashMenuItems: [
       ...getDefaultReactSlashMenuItems(customSchema),
-      insertImage,
+      insertAccordion,
     ],
   });
 
